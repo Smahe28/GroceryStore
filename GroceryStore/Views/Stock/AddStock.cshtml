@@ -1,0 +1,202 @@
+﻿@model SMG_Model.StockArrivalModel
+<head>
+    <link href="~/Css/dataTables.min.css" rel="stylesheet" />
+    <style>
+        fieldset {
+            border: 1px solid #ddd !important;
+            margin: 0;
+            min-width: 0;
+            padding: 10px;
+            position: relative;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            padding-left: 10px !important;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 15%;
+            color: #32a836;
+        }
+    </style>
+</head>
+
+<br />
+<h2>Import Details :</h2>
+<fieldset>
+    <div class="container">
+        <input type="hidden" id="PrtId" value="0" />
+        <div class="row">
+            <div class="col-md-4">
+                Bill Number :
+                <input type="text" class="form-control" id="txtbill" value="" name="Bill" />
+            </div>
+            <div class="col-md-4">
+                Contractor Name :
+                @Html.DropDownList("Dealers", ViewBag.Dealers as SelectList, "--Select--", new { @class = "form-control" })
+            </div>
+            <div class="col-md-4">
+                From :
+                <input type="text" class="form-control" id="txtimportfrom" value="" name="From" />
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-4">
+                Import Date :
+                <input type="date" class="form-control" id="txtIDate" name="Date" />
+            </div>
+            <div class="col-md-4">
+                Vehicle Number :
+                <input type="text" class="form-control" id="txtVNo" value="" name="VNumber" />
+            </div>
+            <div class="col-md-4">
+                Total Import Cost:
+                <input type="text" class="form-control" id="txtTotalCost" value="0" name="TotalCost" />
+            </div>
+        </div>
+    </div>
+</fieldset>
+<br />
+<h2>Import Products Details & Price :</h2>
+<div class="container" style="margin-bottom:5px">
+    <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-2">
+        Total Cost : <label id="txtTotal"></label></div>
+        <div class="col-md-2"><input style="float:right" type="button" value="Register Goods" name="RegisterGoods" id="btnRGoods" class="btn btn-primary" /></div>
+    </div>
+</div>
+<div>
+    <fieldset>
+        <div class="container">
+            <table class="table table-striped table-responsive" style="width:100%">
+                <thead>
+                    <tr>
+                        <th hidden>
+                            Item Id
+                        </th>
+                        <th>
+                            Product Name
+                        </th>
+                        <th>
+                            Unit Quantity
+                        </th>
+                        <th>
+                            Unite Cost
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tblCartList">
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+</div>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script src="~/Scripts/dataTables.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Dealers').val(0);
+        $('#dpProduct').val(0);
+        $('#Dealers').change(function () {
+            var DelId = $("#Dealers").val();
+            GetProduct(DelId)
+        });
+        $("#btnAddToCart").click(function () {
+            AddToCart();
+        });
+        $("#btnRGoods").click(function () {
+            RegisterGoods();
+        });
+    });
+
+    function RegisterGoods() {
+        var ImportGoods = {};
+        var ListOfOrderDetailsModel = new Array();
+        var importDetails = {};
+            //Stock Arrial from Details
+        importDetails.BillNo = $("#txtbill").val();
+        importDetails.DeliveryBy = $("#Dealers").val();
+        importDetails.DeliveryFrom = $("#txtimportfrom").val();
+        importDetails.DeliveryDate = $("#txtIDate").val();
+        importDetails.vehicleNo = $("#txtVNo").val();
+        importDetails.GoodsCost = $("#txtTotalCost").val();
+        ImportGoods.StockArrival = importDetails ;
+        //Stock Product Details
+        $("#tblCartList").find("tr").each(function () {
+            var OrderDetailsModel = {};
+            OrderDetailsModel.ProductId = parseFloat($(this).find("td:eq(0)").text());
+            OrderDetailsModel.StockUnit = parseFloat($(this).find("td:eq(2)").find("#txtQnty").val());
+            OrderDetailsModel.ImportCost = parseFloat($(this).find("td:eq(3)").find("#txtCost").val());
+            ListOfOrderDetailsModel.push(OrderDetailsModel);
+        });
+        ImportGoods.ProductDetails = ListOfOrderDetailsModel;
+        $.ajax({
+            async: true,
+            type: 'POST',
+            dataType: 'JSON',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ImportGoods),
+            url: '/Stock/RegisterGoods',
+            success: function (data) {
+                alert(data);
+            },
+            error: function () {
+                alert("There is some problem to adding the data");
+            }
+        });
+
+    }
+
+    function GetProduct(DelId) {
+        var tblCartList = $("#tblCartList");
+        tblCartList.empty();
+        $.ajax({
+            async: true,
+            type: 'GET',
+            datatype: 'JSON',
+            contentType: 'application/json; charset=utf-8',
+            data: { DealerID: DelId },
+            url: '/Stock/GetBuyGoodsdetails',
+            success: function (data) {
+                $('#txtimportfrom').val(data.Dealer.City);
+                for (var i = 0; i < data.Products.length; i++) {
+                    var ProductList = "<tr><td hidden>" +
+                        data.Products[i].ProductID +
+                        "</td><td>" +
+                        data.Products[i].ProductName +
+                        "</td><td>" +
+                        "<input type='text' class='form-control' id='txtQnty' value="+data.Products[i].Unite+" />" +
+                        "</td><td>" +
+                        "<input type='text' class='form-control' onchange='TotalCostCount()'  id='txtCost' value='0' />" +
+                        "</td></tr>";
+                    tblCartList.append(ProductList);
+                }
+                TotalCostCount();
+            }
+        });
+    }
+    function TotalCostCount() {
+        let Total = 0;
+        $("#tblCartList").find("tr").each(function () {
+            Total = Total + parseInt($(this).find("td:eq(3)").find("#txtCost").val());
+        });
+        $('#txtTotal').text(Total);
+    }
+    function Refresh() {
+        $('#PrtId').val(0);
+        $("#Category").val(0);
+        $("#dpProduct").val(0);
+        $("#txtUQuantity").val(0);
+        $("#txtUCost").val(0);
+    }
+</script>
+
+
+

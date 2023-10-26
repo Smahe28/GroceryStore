@@ -1,0 +1,169 @@
+﻿@model SMG_Model.Product_category
+<head>
+    @*<link href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" rel="stylesheet" />*@
+    <link href="~/Css/dataTables.min.css" rel="stylesheet" />
+    <style>
+        fieldset {
+            border: 1px solid #ddd !important;
+            margin: 0;
+            min-width: 0;
+            padding: 10px;
+            position: relative;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            padding-left: 10px !important;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 15%;
+            color: #32a836;
+        }
+    </style>
+</head>
+@using (Html.BeginForm())
+{
+     @Html.AntiForgeryToken()
+    <br />
+    <h2>Add Products :</h2>
+    <fieldset>
+        <div class="container">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <input type="hidden" id="PrtId" value="0" />
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        Category :
+                        @Html.DropDownList("Category", ViewBag.Category as SelectList, "--Select--", new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    Product Name :
+                    <input type="text" class="form-control" id="txtProductName" name="ProductName" />
+                </div>
+                <div class="col-md-4">
+                    Unit Price :
+                    <input type="text" class="form-control" id="txtPrice" name="Price" />
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="submit" id="btnSave" value="Create" onclick="return Save();" class="btn btn-success" style="margin-top:15px" />
+                    <input type="submit" id="btnCancel" value="Cancel" onclick="return Refresh();" class="btn btn-warning" style="margin-top:15px" />
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <br />
+    <h2>Product List :</h2>
+    <fieldset>
+        <table class="table table-striped table-hover table-responsive" id="tblProduct" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Unit Price</th>
+                    <th> Price</th>
+                    <th>Option</th>
+                </tr>
+            </thead>
+        </table>
+    </fieldset>
+
+}
+
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+@*<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>*@
+<script src="~/Scripts/dataTables.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(GetallProduct())
+            $('#Category').val(0);
+    function GetallProduct() {
+        $('#tblProduct').DataTable({
+            "ajax": {
+                "url": '/Product/GetAllProduct',
+                "type": "GET",
+                "dataType": "JSON",
+                "condentType": "application/json; charget=utf-8",
+            },
+            "columns": [
+                { "data": "ProductId", "autowidth": true },
+                { "data": "ProductName", "autowidth": true },
+                { "data": "unitPrice", "autowidth": true },
+                {
+                    data: "unitPrice", "render": function (data) {
+                        if (data > 49) {
+                            return '<span style="color:Green;font-weight:600" >High</span>';
+                        }
+                        else {  
+                            return '<span style="color:Red;font-weight:600" >Low</span>';
+                        }
+                    }
+
+                },
+                {
+                    data: "ProductId", "render": function (data) {
+                        return '<button id="btnEdit" class="btn btn-info" onclick="return Edit(' + data + ')">Edit</button>';
+                    }
+                }
+
+            ]
+        })
+    }
+
+    function Save() {
+        var productId = $('#PrtId').val();
+        var categoryId = $('#Category').val();
+        var productname = $('#txtProductName').val();
+        var price = $('#txtPrice').val();
+    $.ajax({
+            type: "POST",
+        url: "/Product/SaveProduct",
+        data: { ProductId: productId ,CategoryId:categoryId ,ProductName:productname ,unitPrice:price},
+            dataType: "text",
+        success: function (data) {
+            
+                alert(data);
+            }
+    });
+        GetallProduct();
+        Refresh();
+        return false;
+    }
+
+    function Edit(prdId) {
+        $.ajax({
+            type: 'GET',
+            datatype: 'JSON',
+            contentType: 'application/json; charset=utf-8',
+            url: '/Product/GetEditData?prdId=' + prdId,
+            success: function (data) {
+                $('#PrtId').val(data.ProductId);
+                $("#Category").val(data.CategoryId);
+                $("#txtProductName").val(data.ProductName);
+                $("#txtPrice").val(data.unitPrice);
+                
+                $("#btnSave").val("Update");
+
+            }
+        });
+
+        return false;
+    }
+
+    function Refresh() {
+        $('#PrtId').val();
+        $("#Category").val(0);
+        $("#txtProductName").val("");
+        $("#txtPrice").val("");
+
+        $("#btnSave").val("Save");
+        return false;
+    }
+</script>

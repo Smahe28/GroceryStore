@@ -1,0 +1,162 @@
+﻿@model IEnumerable<SMG_Model.DailyOrderModel>
+@using GridMvc.Html
+@{
+    ViewBag.Title = "Order List Page";
+}
+
+
+<head>
+    <link href="~/Css/dataTables.min.css" rel="stylesheet" />
+    <link href="~/Content/Gridmvc.css" rel="stylesheet" />
+    <script src="~/Scripts/gridmvc.min.js"></script>
+    <style>
+        .title {
+            padding-top: 10px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            font-weight: 600;
+            font-size: 30px;
+            color: #32a836;
+        }
+
+        fieldset {
+            border: 1px solid #ddd !important;
+            margin: 0;
+            min-width: 0;
+            padding: 10px;
+            position: relative;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            padding-left: 10px !important;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 15%;
+            color: #32a836;
+        }
+    </style>
+</head>
+<br />
+<fieldset>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                Order Number :
+                <input type="text" class="form-control" id="txtOrderNumber" readonly="readonly" value="" name="OrderNumber" />
+            </div>
+            <div class="col-md-4">
+                Shop Name :
+                <input type="text" class="form-control" id="txtShopName" value="" readonly="readonly" name="ShopName" />
+            </div>
+            <div class="col-md-4">
+                Payment type :
+                <select type="text" class="form-control" id="dpPayment" name="PaymentType">
+                    <option value="0">--Select--</option>
+                    <option value="1">Card</option>
+                    <option value="2">Cash</option>
+                    <option value="3">Net Banking</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                Pay Amount :
+                <input type="text" class="form-control" id="txtAmount" readonly="readonly" value="" name="Amount" />
+            </div>
+            <div class="col-md-4">
+                <label style="color:green"></label>
+            </div>
+            <div class="col-md-4">
+                <input style="margin-top:20px" type="button" value="Pay Amount" name="Pay" id="btnPay" class="btn btn-success" />
+            </div>
+        </div>
+    </div>
+</fieldset>
+<br />
+<div>
+    <h2>Order Details :</h2>
+</div>
+<fieldset>
+    <div class="container">
+        @*<table class="table table-striped" id="tblOrderList" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Shop Name</th>
+                        <th>Location</th>
+                        <th>Delivery Date</th>
+                        <th>View Order</th>
+                    </tr>
+                </thead>
+            </table>*@
+        <div class="code-cut">
+            @Html.Grid(Model).Columns(columns =>
+       {
+           columns.Add(c => c.OrderNumber).Titled("Order Number").Filterable(true);
+           columns.Add(c => c.CustomerName).Titled("Shop Name").Filterable(true);
+           columns.Add(c => c.Location).Titled("Location").Filterable(true);
+           columns.Add(c => c.OrderDate).Titled("Delivery Date").Filterable(true);
+           columns.Add()
+           .Encoded(false)
+           .Sanitized(false)
+           .RenderValueAs(c => Html.ActionLink("View", "OrderDetails", new { id = c.OrderNumber }));
+           columns.Add()
+           .Encoded(false)
+           .Sanitized(false)
+           .Titled("Payment")
+           .RenderValueAs(c => c.PayStatus=="Pending"? new HtmlString("<input type='button' class='btn btn-success' value='PAY' Onclick=GetWholesaleDetails('" + c.OrderNumber + "') />"): new HtmlString("<label style='color: green'>Success</label>"));
+
+       }).WithPaging(10).Sortable(true)
+
+        </div>
+
+    </div>
+</fieldset>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script type="text/javascript">
+    $("#btnPay").click(function () {
+        W_Payment();
+    });
+    function GetWholesaleDetails(WCId) {
+        $.ajax({
+            async: true,
+            type: 'GET',
+            datatype: 'JSON',
+            contentType: 'application/json; charset=utf-8',
+            data: { WCId: WCId },
+            url: '/Billing/GetWholesaleDetails',
+            success: function (data) {
+                $('#txtShopName').val(data.ShopName);
+                $('#txtOrderNumber').val(data.OrderNumber);
+                $('#txtAmount').val(data.TotalAmount);
+            }
+        });
+    }
+    function W_Payment() {
+        var OrderNumber = $('#txtOrderNumber').val();
+        var PaymentType = $("#dpPayment option:selected").text();
+        var Amount = $('#txtAmount').val();
+        $.ajax({
+            type: "POST",
+            url: "/Billing/WholeSalePayment",
+            data: { OrderNumber: OrderNumber, PaymentType: PaymentType, Amount: Amount },
+            dataType: "text",
+            success: function (data) {
+                alert(data);
+            },
+            error: function () {
+                alert("There is some problem in your Payment");
+            }
+        });
+        Refresh();
+    }
+    function Refresh() {
+        $("#txtOrderNumber").val("");
+        $("#dpPayment").val(0);
+        $("#txtAmount").val("");
+        $("#txtShopName").val("");
+    }
+</script>
+

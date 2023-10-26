@@ -1,0 +1,94 @@
+﻿@model IEnumerable<SMG_Model.DailyOrderDetailsModel>
+@using GridMvc.Html
+@{
+    ViewBag.Title = "Order List Page";
+}
+
+
+<head>
+    <link href="~/Css/dataTables.min.css" rel="stylesheet" />
+    <link href="~/Content/Gridmvc.css" rel="stylesheet" />
+    <script src="~/Scripts/gridmvc.min.js"></script>
+    <style>
+        .title {
+            padding-top: 10px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            font-weight: 600;
+            font-size: 30px;
+            color: #32a836;
+        }
+
+        fieldset {
+            border: 1px solid #ddd !important;
+            margin: 0;
+            min-width: 0;
+            padding: 10px;
+            position: relative;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            padding-left: 10px !important;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 15%;
+            color: #32a836;
+        }
+        .header{
+            display:flex;
+            width:100%;
+        }
+    </style>
+</head>
+<br />
+<div>
+    <h2>Order Details :</h2>
+</div>
+<fieldset>
+    <div>
+        @{
+            decimal TotalPrice = 0;
+            string Name = "";
+            string Location = "";
+            foreach (var item in Model)
+            {
+                TotalPrice = TotalPrice + item.Total;
+                Name = item.OrderInfo.CustomerName;
+                Location = item.OrderInfo.Location;
+            }
+            <div class="header">
+
+                <div>
+                    <label style="font-size:18px;font-weight:500;margin-left:200px">@Name</label>
+
+                </div>
+                <div>
+                    <label style="font-size:18px;font-weight:500;margin-left:100px">@Location</label>
+
+                </div>
+                <div>
+                    <label style="font-size:18px;font-weight:500;margin-left:500px">Total Amount : @TotalPrice</label>
+                </div>
+            </div>
+
+        }
+    </div>
+    <br />
+    <div class="container">
+
+        <div class="code-cut">
+            @Html.Grid(Model).Columns(columns =>
+       {
+           columns.Add(c => c.ItemName).Titled("Product Name").Filterable(true);
+           columns.Add(c => c.Quantity).Titled("Quantity").Filterable(true);
+           columns.Add(c => c.Total).Titled("Total Price").Filterable(true);
+
+       }).WithPaging(10).Sortable(true)
+
+        </div>
+
+    </div>
+</fieldset>
+

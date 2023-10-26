@@ -1,0 +1,93 @@
+﻿
+<style>
+    h2 {
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        font-weight: 600;
+        cursor: default;
+        color: #32a836;
+    }
+    .Menu{
+        display:flex;
+        flex-wrap:wrap;
+        cursor:default;
+    }
+    .menu-list {
+        min-width: 30vh;
+        margin: 5px;
+        border-width: 2px;
+        border-style: solid;
+        border-color: lightgray;
+        border-radius: 10px;
+        background-color: rgb(190 255 167 / 0.51);
+    }
+    .category-name {
+        width:100%;
+        font-size: 20px;
+        font-weight: 600;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        background: linear-gradient(rgb(109 254 59 / 0.51),#00960a);
+        text-align:center;
+    }
+    .list-products{
+        height:auto;
+        font-family:'Franklin Gothic';
+        padding:3px;
+    }
+    .product:hover {
+        background-color: #76ff47;
+        border-radius: 5px;
+        text-decoration:none;
+        
+    }
+    .product {
+        display: flex;
+        justify-content: space-between;
+    }
+    .product-name{
+        padding-left:10px;
+        padding-top:2px;
+        padding-bottom:2px;
+    }
+    .product-price {
+        padding-top: 2px;
+        padding-bottom: 2px;
+        width: 55px;
+        text-align: start;
+        align-content: start;
+        justify-content: start;
+    }
+
+</style>
+<div>
+    <h2>MENU CARD</h2>
+</div>
+@using (Html.BeginForm())
+{
+<div class="Menu">
+    @foreach (var item in ViewBag.CateData)
+    {
+        <div class="menu-list">
+            <div class="category-name">
+                @item.category.CategoryName
+            </div>
+            <div class="hidden">
+                @item.category.CategoryId
+            </div>
+            <div class="list-products">
+                @foreach(var prdct in ViewBag.Product)
+                {
+                    if(@item.category.CategoryId==@prdct.product.CategoryId)
+                        {
+                <div class="product">
+                    <div class="product-name">@prdct.product.ProductName</div>
+                    <div class="product-price">INR @prdct.product.unitPrice</div>
+                </div>
+                        }
+                }
+            </div>
+        </div>
+    }
+</div>
+}
+
+

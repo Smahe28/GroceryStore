@@ -1,0 +1,389 @@
+﻿@model SMG_Model.Product_category
+<head>
+    <link href="~/Css/dataTables.min.css" rel="stylesheet" />
+    <style>
+        fieldset {
+            border: 1px solid #ddd !important;
+            margin: 0;
+            min-width: 0;
+            padding: 10px;
+            position: relative;
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            padding-left: 10px !important;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 15%;
+            color: #32a836;
+        }
+    </style>
+</head>
+
+<br />
+<h2>Purchase Details :</h2>
+<fieldset>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                Customer Name :
+                <input type="text" class="form-control" id="txtCustName" value="" name="CustomerName" />
+            </div>
+            <div class="col-md-4">
+                Payment type :
+                <select type="text" class="form-control" id="dpPayment" name="PaymentType">
+                    <option value="0">--Select--</option>
+                    <option value="1">Card</option>
+                    <option value="2">Cash</option>
+                    <option value="3">Net Banking</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                Total Price :
+                <input type="text" class="form-control" id="txtPrice" value="0" readonly="readonly" name="Price" />
+            </div>
+
+        </div>
+    </div>
+</fieldset>
+<br />
+<h2>Add Products :</h2>
+<fieldset>
+    <div class="container">
+        <input type="hidden" id="PrtId" value="0" />
+        <div class="row">
+            <div class="col-md-4">
+                Category :
+                @Html.DropDownList("Category", ViewBag.Category as SelectList, new { @class = "form-control" })
+            </div>
+            <div class="col-md-4">
+                Product Name :
+                <select type="text" class="form-control" id="dpProduct" name="ProductName"></select>
+            </div>
+            <div class="col-md-4">
+                Unit Price :
+                <input type="text" class="form-control" id="txtUnitPrice" value="0" readonly="readonly" name="UnitPrice" />
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-4">
+                Quantity :
+                <input type="text" class="form-control" id="txtQuantity" value="0" name="Quantity" />
+            </div>
+            <div class="col-md-4">
+                Discount :
+                <input type="text" class="form-control" id="txtDiscount" value="0" name="Discount" />
+            </div>
+            <div class="col-md-4">
+                Total :
+                <input type="text" class="form-control" readonly="readonly" id="txtTotalPrice" value="0" name="TotalPrice" />
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            <div class="col-md-4">
+                <input style="margin-top:20px" type="button" value="Add To Cart" name="AddToCart" id="btnAddToCart" class="btn btn-success" />
+            </div>
+        </div>
+    </div>
+
+</fieldset>
+<br />
+<h2>Cart Details :</h2>
+<div class="container" style="margin-bottom:5px">
+    <input data-toggle="modal" data-target="#divPayment" style="float:right" type="button" value="Checkout" name="checkout" id="btnCheckout" class="btn btn-primary" />
+</div>
+<div>
+    <fieldset>
+        <div class="container">
+            <table class="table table-striped table-responsive" style="width:100%" id="tblCartList">
+                <thead>
+                    <tr>
+                        <th hidden>
+                            Item Id
+                        </th>
+                        <th>
+                            Product Name
+                        </th>
+                        <th>
+                            Unit Price
+                        </th>
+                        <th>
+                            Quantity
+                        </th>
+                        <th>
+                            Discount
+                        </th>
+                        <th>
+                            Total
+                        </th>
+                        <th>
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </fieldset>
+</div>
+<div id="divPayment" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Payment</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        Payment Total:
+                        <input style="text-align:right" type="text" id="txtFinalTotal" readonly="readonly" value="0" class="form-control" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        Payment Amount:
+                        <input style="text-align:right" type="text" id="txtPaymentAmount" value="0" class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        Return Total:
+                        <input style="text-align:right" type="text" id="txtReturnTotal" value="0" class="form-control" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        Balance Amount:
+                        <input style="text-align:right" type="text" id="txtBalance" readonly="readonly" value="0" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnPayment" value="Payment">Payment</button>
+                <button class="btn btn-danger" id="btnClose" data-dismiss="modal" value="Payment">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+@*<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>*@
+<script src="~/Scripts/dataTables.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Category').val(0);
+        $('#dpProduct').val(0);
+        $('#Category').change(function () {
+            var CtId = $("#Category").val();
+            GetProduct(CtId);
+        });
+        $('#dpProduct').change(function () {
+            var PrtId = $("#dpProduct").val();
+            GetPrtUnitPrice(PrtId);
+        });
+        $("input[type=text]").on("input", function () {
+            CalculateTotal();
+        });
+        $("#btnAddToCart").click(function () {
+            AddToCart();
+        });
+        $("input[type=text]").on("input", function () {
+            CalculateBalance();
+        });
+        $("#btnPayment").click(function () {
+            FinalPayment();
+        });
+    });
+
+    function FinalPayment() {
+        var objOrderModel = {};
+        var ListOfOrderDetailsModel = new Array();
+        //ListOfOrderDetailsModel
+        objOrderModel.PaymentType = $("#dpPayment option:selected").text();
+        objOrderModel.CustomerName = $("#txtCustName").val();
+        objOrderModel.FinalTotal = $("#txtFinalTotal").val();
+
+        $("#tblCartList").find("tr:gt(0)").each(function () {
+            var OrderDetailsModel = {};
+            OrderDetailsModel.Total = parseFloat($(this).find("td:eq(5)").text());
+            OrderDetailsModel.ItemId = parseFloat($(this).find("td:eq(0)").text());
+            OrderDetailsModel.UnitPrice = parseFloat($(this).find("td:eq(2)").text());
+            OrderDetailsModel.Quantity = parseFloat($(this).find("td:eq(3)").text());
+            OrderDetailsModel.Discount = parseFloat($(this).find("td:eq(4)").text());
+            ListOfOrderDetailsModel.push(OrderDetailsModel);
+        });
+        objOrderModel.ListOfOrderDetailsModel = ListOfOrderDetailsModel;
+        $.ajax({
+            async: true,
+            type: 'POST',
+            dataType: 'JSON',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(objOrderModel),
+            url: '/Billing/SaveOrders',
+            success: function (data) {
+                alert(data);
+            },
+            error: function () {
+                alert("There is some problem to adding the data");
+            }
+        });
+
+    }
+
+    function AddToCart() {
+        var tblCartList = $("#tblCartList");
+        if (cartValidation()){
+            var UnitPrice = $("#txtUnitPrice").val();
+            var Quantity = $("#txtQuantity").val();
+            var Discount = $("#txtDiscount").val();
+            var PrtId = $("#dpProduct").val();
+            var PrtName = $("#dpProduct option:selected").text();
+
+            var Total = (UnitPrice * Quantity) - Discount;
+            var ProductList = "<tr><td hidden>" +
+                PrtId +
+                "</td><td>" +
+                PrtName +
+                "</td><td>" +
+                parseFloat(UnitPrice).toFixed(2) +
+                "</td><td>" +
+                parseFloat(Quantity).toFixed(2) +
+                "</td><td>" +
+                parseFloat(Discount).toFixed(2) +
+                "</td><td>" +
+                parseFloat(Total).toFixed(2) +
+                "</td><td><input type='button' value='Remove' name='remove' class='btn btn-sm btn-danger' onclick='RemoveProduct(this)'/> </tr></tr>";
+            tblCartList.append(ProductList);
+            FinalPrtTotal();
+            Refresh();
+        }
+
+
+    }
+    function FinalPrtTotal() {
+        $("#txtTotal").val("0");
+        var FinalTotal = 0;
+        $("#tblCartList").find("tr:gt(0)").each(function () {
+            var Total = parseFloat($(this).find("td:eq(5)").text());
+            FinalTotal += Total;
+        });
+        $("#txtPrice").val(FinalTotal);
+        $("#txtFinalTotal").val(FinalTotal);
+        $("#txtBalance").val(FinalTotal);
+
+    }
+
+    function CalculateBalance() {
+        var FinalAmount = $("#txtFinalTotal").val();
+        var PaymentAmount = $("#txtPaymentAmount").val();
+        var ReturnAmount = $("#txtReturnTotal").val();
+        var BalanceAmount = (FinalAmount - (PaymentAmount - ReturnAmount));
+        $("#txtBalance").val(BalanceAmount);
+        if (BalanceAmount == 0) {
+            $("#btnPayment").removeAttr("disabled");
+        }
+        else {
+            $("#btnPayment").attr("disabled", "disabled");
+        }
+    }
+
+    function RemoveProduct(PtrId) {
+        $(PtrId).closest('tr').remove();
+    }
+    function CalculateTotal() {
+        var UnitPrice = $("#txtUnitPrice").val();
+        var Quantity = $("#txtQuantity").val();
+        var Discount = $("#txtDiscount").val();
+        var Total = (UnitPrice * Quantity) - Discount;
+        $("#txtTotalPrice").val(parseFloat(Total).toFixed(2));
+    }
+    function GetPrtUnitPrice(PrtId) {
+        $.ajax({
+            async: true,
+            type: 'GET',
+            datatype: 'JSON',
+            contentType: 'application/json; charset=utf-8',
+            data: { ProductId: PrtId },
+            url: '/Billing/GetItemUnitPrice',
+            success: function (data) {
+                $("#txtUnitPrice").val(data.unitPrice);
+                if (data.CStock == 0) {
+                    alert("Stock is " + data.CStock);
+                }
+            },
+            error: function () {
+                alert("There is some problem to get the Unit Price");
+            }
+        });
+    }
+    function GetProduct(CtId) {
+        $.ajax({
+            async: true,
+            type: 'GET',
+            datatype: 'JSON',
+            contentType: 'application/json; charset=utf-8',
+            data: { CategoryId: CtId },
+            url: '/Billing/GetProducts',
+            success: function (data) {
+                $('#dpProduct').empty();
+                for (var i = 0; i < data.length; i++) {
+                    var objProd = new Option(data[i].ProductName, data[i].ProductId);
+                    $('#dpProduct').append(objProd);
+                    $('#dpProduct').val(0);
+                }
+            }
+        });
+    }
+
+    function Save() {
+        var productId = $('#PrtId').val();
+        var categoryId = $('#Category').val();
+        var productname = $('#txtProductName').val();
+        var price = $('#txtPrice').val();
+        $.ajax({
+            type: "POST",
+            url: "",
+            data: { ProductId: productId, CategoryId: categoryId, ProductName: productname, unitPrice: price },
+            dataType: "text",
+            success: function (data) {
+
+                alert(data);
+            }
+        });
+        GetallProduct();
+        Refresh();
+        return false;
+    }
+
+    function Refresh() {
+        $('#PrtId').val(0);
+        $("#Category").val(0);
+        $("#dpProduct").val(0);
+        $("#txtUnitPrice").val(0);
+        $("#txtQuantity").val(0);
+        $("#txtDiscount").val(0);
+        $("#txtTotalPrice").val(0);
+        $("#btnSave").val("Save");
+    }
+
+    function cartValidation() {
+        var UnitPrice = $("#txtUnitPrice").val();
+        var Quantity = $("#txtQuantity").val();
+        var Discount = $("#txtDiscount").val();
+        var PrtId = $("#dpProduct").val();
+        if (PrtId == 0) {
+            $("#dpProduct").addClass()
+        }
+
+        return true;
+    }
+
+</script>
+
+
+
