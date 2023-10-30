@@ -31,7 +31,7 @@ namespace GroceryStore.Controllers
         }
         public JsonResult SaveOrders(DailyOrderModel objDailyOrder)
         {
-            string SaveID = "1234567890";
+            string SaveID = "abc";
             IBilling l_bill = BillingBLL.SaveOrders(objDailyOrder);
             string status = l_bill.SaveOrders(objDailyOrder);
             return Json(status, JsonRequestBehavior.AllowGet);
